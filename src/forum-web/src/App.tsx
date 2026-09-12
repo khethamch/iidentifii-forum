@@ -2,6 +2,7 @@ import { Link, Route, Routes } from "react-router-dom";
 import { useAuth } from "./useAuth";
 import { Discussions } from "./pages/Discussions";
 import { Login } from "./pages/Login";
+import { PostDetail } from "./pages/PostDetail";
 
 export default function App() {
   const { user, expired, logout } = useAuth();
@@ -45,6 +46,7 @@ export default function App() {
           <Route path="/" element={<Discussions />} />
           <Route path="/login" element={<Login key="login" />} />
           <Route path="/register" element={<Login key="register" register />} />
+          <Route path="/posts/:id" element={<PostDetail />} />
           <Route
             path="*"
             element={
