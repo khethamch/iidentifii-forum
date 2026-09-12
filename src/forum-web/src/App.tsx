@@ -2,8 +2,8 @@ import { Link, Route, Routes } from "react-router-dom";
 import { useAuth } from "./useAuth";
 import { Discussions } from "./pages/Discussions";
 import { Login } from "./pages/Login";
+import { CreatePost } from "./pages/CreatePost";
 import { PostDetail } from "./pages/PostDetail";
-
 export default function App() {
   const { user, expired, logout } = useAuth();
   return (
@@ -33,6 +33,9 @@ export default function App() {
                 Log in
               </Link>
             )}
+            <Link className="button primary" to="/new">
+              New post
+            </Link>
           </div>
         </div>
       </header>
@@ -46,6 +49,7 @@ export default function App() {
           <Route path="/" element={<Discussions />} />
           <Route path="/login" element={<Login key="login" />} />
           <Route path="/register" element={<Login key="register" register />} />
+          <Route path="/new" element={<CreatePost />} />
           <Route path="/posts/:id" element={<PostDetail />} />
           <Route
             path="*"
