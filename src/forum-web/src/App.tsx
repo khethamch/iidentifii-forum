@@ -1,6 +1,6 @@
-// Defines page routes and the shared header. Page components handle their own data and forms.
 import { Link, Route, Routes } from "react-router-dom";
 import { useAuth } from "./useAuth";
+import { Discussions } from "./pages/Discussions";
 import { Login } from "./pages/Login";
 
 export default function App() {
@@ -42,15 +42,7 @@ export default function App() {
           </p>
         )}
         <Routes>
-          <Route
-            path="/"
-            element={
-              <div className="intro">
-                <h1>Partner forum</h1>
-                <p>Browsing and posting are coming in the next few commits.</p>
-              </div>
-            }
-          />
+          <Route path="/" element={<Discussions />} />
           <Route path="/login" element={<Login key="login" />} />
           <Route path="/register" element={<Login key="register" register />} />
           <Route
