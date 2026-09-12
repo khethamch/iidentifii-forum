@@ -1,0 +1,1092 @@
+{
+  "info": {
+    "name": "Partner Forum API v1",
+    "description": "Run in order against the local Development server. Creates fictional test accounts and posts. Passwords are public demo credentials only. All timestamps are UTC; from is inclusive and to exclusive. Page size 1–50. Tags are flagged/unflagged; sort is newest/oldest/likes. Bearer tokens last 30 minutes. Login requests capture token automatically.\n\nImport Local.postman_environment.json and select Forum Local, then run the collection in order. The environment contains baseUrl only; token, newEmail and postId are managed by collection scripts. Saved response examples are synthetic. Datetimes are UTC even where SQL Server serialises a timestamp without a Z suffix. HTTP 400 uses Problem Details/ValidationProblemDetails; unexpected errors use 500 with a traceId. The local API uses HTTP for development only; deployed services require HTTPS. Run scenarios with a fresh seed database where post 1 belongs to Alex.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:5088/api/v1"
+    },
+    {
+      "key": "token",
+      "value": ""
+    },
+    {
+      "key": "postId",
+      "value": ""
+    },
+    {
+      "key": "newEmail",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "Health",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/health",
+        "description": "Readiness of the running API process. Public. Returns 200 with status; this endpoint does not itself query SQL Server.\n\nSaved responses are illustrative schema examples, not credentials or captured user data.",
+        "auth": {
+          "type": "noauth"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Expected HTTP 200\", () => pm.response.to.have.status(200));"
+            ]
+          }
+        }
+      ],
+      "response": [
+        {
+          "name": "200 OK — illustrative example",
+          "originalRequest": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/health",
+            "description": "Readiness of the running API process. Public. Returns 200 with status; this endpoint does not itself query SQL Server.\n\nSaved responses are illustrative schema examples, not credentials or captured user data.",
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "status": "OK",
+          "code": 200,
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "body": "{\n  \"status\": \"ok\"\n}",
+          "cookie": []
+        }
+      ]
+    },
+    {
+      "name": "Browse anonymously",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/posts?page=1&pageSize=2&sort=newest",
+        "description": "GET is public. Returns {items,total,pageNumber,pageSize}; items contain id, authorId, author, title, body, createdAt, likeCount, commentCount, likedByMe and tags. With a bearer token, likedByMe reflects the current user. Query parameters: page (1–100000, default 1), pageSize (1–50, default 10), author (user ID), from (inclusive UTC date-time), to (exclusive UTC date-time), tag (flagged/unflagged), sort (newest/oldest/likes; default newest). Example: /posts?author=alex&from=2026-09-01T00:00:00Z&to=2026-10-01T00:00:00Z&sort=likes&page=1&pageSize=10. Invalid values or reversed dates return 400. Filters apply to posts. POST requires a bearer token and JSON {title,body}: trimmed title 1–180, body 1–10000 characters. Returns 201 {id} with Location; 400 for validation; 401 if unauthenticated. Author identity always comes from the token.\n\nSaved responses are illustrative schema examples, not credentials or captured user data.",
+        "auth": {
+          "type": "noauth"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Expected HTTP 200\", () => pm.response.to.have.status(200));",
+              "pm.test(\"Bounded page\", () => pm.expect(pm.response.json().items.length).to.be.at.most(2));"
+            ]
+          }
+        }
+      ],
+      "response": [
+        {
+          "name": "200 OK — illustrative example",
+          "originalRequest": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/posts?page=1&pageSize=2&sort=newest",
+            "description": "GET is public. Returns {items,total,pageNumber,pageSize}; items contain id, authorId, author, title, body, createdAt, likeCount, commentCount, likedByMe and tags. With a bearer token, likedByMe reflects the current user. Query parameters: page (1–100000, default 1), pageSize (1–50, default 10), author (user ID), from (inclusive UTC date-time), to (exclusive UTC date-time), tag (flagged/unflagged), sort (newest/oldest/likes; default newest). Example: /posts?author=alex&from=2026-09-01T00:00:00Z&to=2026-10-01T00:00:00Z&sort=likes&page=1&pageSize=10. Invalid values or reversed dates return 400. Filters apply to posts. POST requires a bearer token and JSON {title,body}: trimmed title 1–180, body 1–10000 characters. Returns 201 {id} with Location; 400 for validation; 401 if unauthenticated. Author identity always comes from the token.\n\nSaved responses are illustrative schema examples, not credentials or captured user data.",
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "status": "OK",
+          "code": 200,
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "body": "{\n  \"items\": [\n    {\n      \"id\": 1,\n      \"authorId\": \"alex\",\n      \"author\": \"Alex Chen\",\n      \"title\": \"Example integration question\",\n      \"body\": \"A fictional example for API consumers.\",\n      \"createdAt\": \"2026-09-11T10:00:00\",\n      \"likeCount\": 1,\n      \"commentCount\": 1,\n      \"likedByMe\": false,\n      \"tags\": []\n    }\n  ],\n  \"total\": 1,\n  \"pageNumber\": 1,\n  \"pageSize\": 2\n}",
+          "cookie": []
+        }
+      ]
+    },
+    {
+      "name": "Read post",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/posts/1",
+        "description": "Public GET. Returns a post including moderation label, moderator display name and UTC timestamp; returns 404 if missing. Optional bearer authentication personalises likedByMe.\n\nSaved responses are illustrative schema examples, not credentials or captured user data.",
+        "auth": {
+          "type": "noauth"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Expected HTTP 200\", () => pm.response.to.have.status(200));"
+            ]
+          }
+        }
+      ],
+      "response": [
+        {
+          "name": "200 OK — illustrative example",
+          "originalRequest": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/posts/1",
+            "description": "Public GET. Returns a post including moderation label, moderator display name and UTC timestamp; returns 404 if missing. Optional bearer authentication personalises likedByMe.\n\nSaved responses are illustrative schema examples, not credentials or captured user data.",
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "status": "OK",
+          "code": 200,
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "body": "{\n  \"id\": 1,\n  \"authorId\": \"alex\",\n  \"author\": \"Alex Chen\",\n  \"title\": \"Example integration question\",\n  \"body\": \"A fictional example for API consumers.\",\n  \"createdAt\": \"2026-09-11T10:00:00\",\n  \"likeCount\": 1,\n  \"commentCount\": 1,\n  \"likedByMe\": false,\n  \"tags\": []\n}",
+          "cookie": []
+        }
+      ]
+    },
+    {
+      "name": "Read comments",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/posts/1/comments?page=1&pageSize=2",
+        "description": "GET is public. Query page (default 1) and pageSize (default 10, maximum 50); comments are ordered by creation time then ID. Returns {items,total,pageNumber,pageSize}, with each comment {id,author,body,createdAt}. POST requires Bearer {{token}} and JSON {body} (1–3000 trimmed characters). Returns 201 {id} with Location. Invalid input/page returns 400, anonymous writes 401, missing post 404. Comment endpoints do not support post filters or like sorting.\n\nSaved responses are illustrative schema examples, not credentials or captured user data.",
+        "auth": {
+          "type": "noauth"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Expected HTTP 200\", () => pm.response.to.have.status(200));"
+            ]
+          }
+        }
+      ],
+      "response": [
+        {
+          "name": "200 OK — illustrative example",
+          "originalRequest": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/posts/1/comments?page=1&pageSize=2",
+            "description": "GET is public. Query page (default 1) and pageSize (default 10, maximum 50); comments are ordered by creation time then ID. Returns {items,total,pageNumber,pageSize}, with each comment {id,author,body,createdAt}. POST requires Bearer {{token}} and JSON {body} (1–3000 trimmed characters). Returns 201 {id} with Location. Invalid input/page returns 400, anonymous writes 401, missing post 404. Comment endpoints do not support post filters or like sorting.\n\nSaved responses are illustrative schema examples, not credentials or captured user data.",
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "status": "OK",
+          "code": 200,
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "body": "{\n  \"items\": [\n    {\n      \"id\": 1,\n      \"author\": \"Morgan\",\n      \"body\": \"Example reply.\",\n      \"createdAt\": \"2026-09-12T10:00:00\"\n    }\n  ],\n  \"total\": 1,\n  \"pageNumber\": 1,\n  \"pageSize\": 2\n}",
+          "cookie": []
+        }
+      ]
+    },
+    {
+      "name": "List authors",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/authors",
+        "description": "Public. Returns id/name pairs for users who have authored posts, ordered by display name. Use the id in the author filter.\n\nSaved responses are illustrative schema examples, not credentials or captured user data.",
+        "auth": {
+          "type": "noauth"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Expected HTTP 200\", () => pm.response.to.have.status(200));"
+            ]
+          }
+        }
+      ],
+      "response": [
+        {
+          "name": "200 OK — illustrative example",
+          "originalRequest": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/authors",
+            "description": "Public. Returns id/name pairs for users who have authored posts, ordered by display name. Use the id in the author filter.\n\nSaved responses are illustrative schema examples, not credentials or captured user data.",
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "status": "OK",
+          "code": 200,
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "body": "[\n  {\n    \"id\": \"alex\",\n    \"name\": \"Alex Chen\"\n  }\n]",
+          "cookie": []
+        }
+      ]
+    },
+    {
+      "name": "Register regular user",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/auth/register",
+        "description": "Register a regular user. JSON: email (valid address, max 254), password (at least 12 characters, uppercase, lowercase, digit and symbol), displayName (1–80 trimmed characters). Returns 201 with id and displayName; 400 ValidationProblemDetails for invalid/duplicate registration; 429 when throttled. Submitted roles are ignored. Registration does not issue a token; call login next.\n\nSaved responses are illustrative schema examples, not credentials or captured user data.",
+        "auth": {
+          "type": "noauth"
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"{{newEmail}}\",\n  \"password\": \"ForumDemo!2026\",\n  \"displayName\": \"Postman Partner\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.collectionVariables.set(\"newEmail\", \"partner-\" + pm.variables.replaceIn(\"{{$guid}}\") + \"@example.test\");"
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Expected HTTP 201\", () => pm.response.to.have.status(201));"
+            ]
+          }
+        }
+      ],
+      "response": [
+        {
+          "name": "201 Created — illustrative example",
+          "originalRequest": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/auth/register",
+            "description": "Register a regular user. JSON: email (valid address, max 254), password (at least 12 characters, uppercase, lowercase, digit and symbol), displayName (1–80 trimmed characters). Returns 201 with id and displayName; 400 ValidationProblemDetails for invalid/duplicate registration; 429 when throttled. Submitted roles are ignored. Registration does not issue a token; call login next.\n\nSaved responses are illustrative schema examples, not credentials or captured user data.",
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{newEmail}}\",\n  \"password\": \"ForumDemo!2026\",\n  \"displayName\": \"Postman Partner\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "status": "Created",
+          "code": 201,
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "key": "Location",
+              "value": "/api/v1/auth/me"
+            }
+          ],
+          "body": "{\n  \"id\": \"example-user\",\n  \"displayName\": \"Postman Partner\"\n}",
+          "cookie": []
+        }
+      ]
+    },
+    {
+      "name": "Login new user",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/auth/login",
+        "description": "JSON: email and password. Returns 200 with token, expiresAt (UTC), and user {id,name,isModerator}. Invalid credentials or temporary account lockout return 401. Five failed attempts lock an account for five minutes. Auth routes share a per-IP limit of 30 requests/minute and return 429 when exceeded. The script saves the token to the collection variable; do not create an environment variable named token.\n\nSaved responses are illustrative schema examples, not credentials or captured user data.",
+        "auth": {
+          "type": "noauth"
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"{{newEmail}}\",\n  \"password\": \"ForumDemo!2026\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Expected HTTP 200\", () => pm.response.to.have.status(200));",
+              "pm.collectionVariables.set(\"token\", pm.response.json().token);"
+            ]
+          }
+        }
+      ],
+      "response": [
+        {
+          "name": "200 OK — illustrative example",
+          "originalRequest": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/auth/login",
+            "description": "JSON: email and password. Returns 200 with token, expiresAt (UTC), and user {id,name,isModerator}. Invalid credentials or temporary account lockout return 401. Five failed attempts lock an account for five minutes. Auth routes share a per-IP limit of 30 requests/minute and return 429 when exceeded. The script saves the token to the collection variable; do not create an environment variable named token.\n\nSaved responses are illustrative schema examples, not credentials or captured user data.",
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{newEmail}}\",\n  \"password\": \"ForumDemo!2026\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "status": "OK",
+          "code": 200,
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "body": "{\n  \"token\": \"<JWT returned by login; never publish a real token>\",\n  \"expiresAt\": \"2026-09-12T11:30:00Z\",\n  \"user\": {\n    \"id\": \"example-user\",\n    \"name\": \"Postman Partner\",\n    \"isModerator\": false\n  }\n}",
+          "cookie": []
+        }
+      ]
+    },
+    {
+      "name": "Current identity",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/auth/me",
+        "description": "Requires Bearer {{token}}. Returns 200 with id, name and isModerator from validated claims, or 401 for absent/invalid/expired credentials.\n\nSaved responses are illustrative schema examples, not credentials or captured user data."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Expected HTTP 200\", () => pm.response.to.have.status(200));"
+            ]
+          }
+        }
+      ],
+      "response": [
+        {
+          "name": "200 OK — illustrative example",
+          "originalRequest": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/auth/me",
+            "description": "Requires Bearer {{token}}. Returns 200 with id, name and isModerator from validated claims, or 401 for absent/invalid/expired credentials.\n\nSaved responses are illustrative schema examples, not credentials or captured user data."
+          },
+          "status": "OK",
+          "code": 200,
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "body": "{\n  \"id\": \"example-user\",\n  \"name\": \"Postman Partner\",\n  \"isModerator\": false\n}",
+          "cookie": []
+        }
+      ]
+    },
+    {
+      "name": "Create a post",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/posts",
+        "description": "GET is public. Returns {items,total,pageNumber,pageSize}; items contain id, authorId, author, title, body, createdAt, likeCount, commentCount, likedByMe and tags. With a bearer token, likedByMe reflects the current user. Query parameters: page (1–100000, default 1), pageSize (1–50, default 10), author (user ID), from (inclusive UTC date-time), to (exclusive UTC date-time), tag (flagged/unflagged), sort (newest/oldest/likes; default newest). Example: /posts?author=alex&from=2026-09-01T00:00:00Z&to=2026-10-01T00:00:00Z&sort=likes&page=1&pageSize=10. Invalid values or reversed dates return 400. Filters apply to posts. POST requires a bearer token and JSON {title,body}: trimmed title 1–180, body 1–10000 characters. Returns 201 {id} with Location; 400 for validation; 401 if unauthenticated. Author identity always comes from the token.\n\nSaved responses are illustrative schema examples, not credentials or captured user data.",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"title\": \"Postman integration walkthrough\",\n  \"body\": \"A demonstration of the documented API, independent of the React application.\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Expected HTTP 201\", () => pm.response.to.have.status(201));",
+              "pm.collectionVariables.set(\"postId\", String(pm.response.json().id));"
+            ]
+          }
+        }
+      ],
+      "response": [
+        {
+          "name": "201 Created — illustrative example",
+          "originalRequest": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/posts",
+            "description": "GET is public. Returns {items,total,pageNumber,pageSize}; items contain id, authorId, author, title, body, createdAt, likeCount, commentCount, likedByMe and tags. With a bearer token, likedByMe reflects the current user. Query parameters: page (1–100000, default 1), pageSize (1–50, default 10), author (user ID), from (inclusive UTC date-time), to (exclusive UTC date-time), tag (flagged/unflagged), sort (newest/oldest/likes; default newest). Example: /posts?author=alex&from=2026-09-01T00:00:00Z&to=2026-10-01T00:00:00Z&sort=likes&page=1&pageSize=10. Invalid values or reversed dates return 400. Filters apply to posts. POST requires a bearer token and JSON {title,body}: trimmed title 1–180, body 1–10000 characters. Returns 201 {id} with Location; 400 for validation; 401 if unauthenticated. Author identity always comes from the token.\n\nSaved responses are illustrative schema examples, not credentials or captured user data.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Postman integration walkthrough\",\n  \"body\": \"A demonstration of the documented API, independent of the React application.\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "status": "Created",
+          "code": 201,
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "key": "Location",
+              "value": "/api/v1/posts/123"
+            }
+          ],
+          "body": "{\n  \"id\": 123\n}",
+          "cookie": []
+        }
+      ]
+    },
+    {
+      "name": "Comment on post",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/posts/{{postId}}/comments",
+        "description": "GET is public. Query page (default 1) and pageSize (default 10, maximum 50); comments are ordered by creation time then ID. Returns {items,total,pageNumber,pageSize}, with each comment {id,author,body,createdAt}. POST requires Bearer {{token}} and JSON {body} (1–3000 trimmed characters). Returns 201 {id} with Location. Invalid input/page returns 400, anonymous writes 401, missing post 404. Comment endpoints do not support post filters or like sorting.\n\nSaved responses are illustrative schema examples, not credentials or captured user data.",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"body\": \"The API is accessible to third-party clients.\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Expected HTTP 201\", () => pm.response.to.have.status(201));"
+            ]
+          }
+        }
+      ],
+      "response": [
+        {
+          "name": "201 Created — illustrative example",
+          "originalRequest": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/posts/{{postId}}/comments",
+            "description": "GET is public. Query page (default 1) and pageSize (default 10, maximum 50); comments are ordered by creation time then ID. Returns {items,total,pageNumber,pageSize}, with each comment {id,author,body,createdAt}. POST requires Bearer {{token}} and JSON {body} (1–3000 trimmed characters). Returns 201 {id} with Location. Invalid input/page returns 400, anonymous writes 401, missing post 404. Comment endpoints do not support post filters or like sorting.\n\nSaved responses are illustrative schema examples, not credentials or captured user data.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"body\": \"The API is accessible to third-party clients.\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "status": "Created",
+          "code": 201,
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "key": "Location",
+              "value": "/api/v1/posts/123/comments"
+            }
+          ],
+          "body": "{\n  \"id\": 123\n}",
+          "cookie": []
+        }
+      ]
+    },
+    {
+      "name": "Reject self-like",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "url": "{{baseUrl}}/posts/{{postId}}/likes",
+        "description": "POST requires Bearer {{token}}. No body. Returns 204 (empty body), 401 if anonymous, 404 if post missing, or 409 for an own post or an existing like. The database enforces one like per user/post even for concurrent requests. No unlike operation is exposed.\n\nSaved responses are illustrative schema examples, not credentials or captured user data."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Expected HTTP 409\", () => pm.response.to.have.status(409));"
+            ]
+          }
+        }
+      ],
+      "response": [
+        {
+          "name": "409 Conflict — illustrative example",
+          "originalRequest": {
+            "method": "POST",
+            "header": [],
+            "url": "{{baseUrl}}/posts/{{postId}}/likes",
+            "description": "POST requires Bearer {{token}}. No body. Returns 204 (empty body), 401 if anonymous, 404 if post missing, or 409 for an own post or an existing like. The database enforces one like per user/post even for concurrent requests. No unlike operation is exposed.\n\nSaved responses are illustrative schema examples, not credentials or captured user data."
+          },
+          "status": "Conflict",
+          "code": 409,
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/problem+json"
+            }
+          ],
+          "body": "{\n  \"type\": \"about:blank\",\n  \"title\": \"You cannot like your own post.\",\n  \"status\": 409\n}",
+          "cookie": []
+        }
+      ]
+    },
+    {
+      "name": "Login another user",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/auth/login",
+        "description": "JSON: email and password. Returns 200 with token, expiresAt (UTC), and user {id,name,isModerator}. Invalid credentials or temporary account lockout return 401. Five failed attempts lock an account for five minutes. Auth routes share a per-IP limit of 30 requests/minute and return 429 when exceeded. The script saves the token to the collection variable; do not create an environment variable named token.\n\nSaved responses are illustrative schema examples, not credentials or captured user data.",
+        "auth": {
+          "type": "noauth"
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"priya@example.test\",\n  \"password\": \"ForumDemo!2026\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Expected HTTP 200\", () => pm.response.to.have.status(200));",
+              "pm.collectionVariables.set(\"token\", pm.response.json().token);"
+            ]
+          }
+        }
+      ],
+      "response": [
+        {
+          "name": "200 OK — illustrative example",
+          "originalRequest": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/auth/login",
+            "description": "JSON: email and password. Returns 200 with token, expiresAt (UTC), and user {id,name,isModerator}. Invalid credentials or temporary account lockout return 401. Five failed attempts lock an account for five minutes. Auth routes share a per-IP limit of 30 requests/minute and return 429 when exceeded. The script saves the token to the collection variable; do not create an environment variable named token.\n\nSaved responses are illustrative schema examples, not credentials or captured user data.",
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"priya@example.test\",\n  \"password\": \"ForumDemo!2026\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "status": "OK",
+          "code": 200,
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "body": "{\n  \"token\": \"<JWT returned by login; never publish a real token>\",\n  \"expiresAt\": \"2026-09-12T11:30:00Z\",\n  \"user\": {\n    \"id\": \"example-user\",\n    \"name\": \"Postman Partner\",\n    \"isModerator\": false\n  }\n}",
+          "cookie": []
+        }
+      ]
+    },
+    {
+      "name": "Like another author",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "url": "{{baseUrl}}/posts/{{postId}}/likes",
+        "description": "POST requires Bearer {{token}}. No body. Returns 204 (empty body), 401 if anonymous, 404 if post missing, or 409 for an own post or an existing like. The database enforces one like per user/post even for concurrent requests. No unlike operation is exposed.\n\nSaved responses are illustrative schema examples, not credentials or captured user data."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Expected HTTP 204\", () => pm.response.to.have.status(204));"
+            ]
+          }
+        }
+      ],
+      "response": [
+        {
+          "name": "204 No Content — illustrative example",
+          "originalRequest": {
+            "method": "POST",
+            "header": [],
+            "url": "{{baseUrl}}/posts/{{postId}}/likes",
+            "description": "POST requires Bearer {{token}}. No body. Returns 204 (empty body), 401 if anonymous, 404 if post missing, or 409 for an own post or an existing like. The database enforces one like per user/post even for concurrent requests. No unlike operation is exposed.\n\nSaved responses are illustrative schema examples, not credentials or captured user data."
+          },
+          "status": "No Content",
+          "code": 204,
+          "header": [],
+          "body": "",
+          "cookie": []
+        }
+      ]
+    },
+    {
+      "name": "Reject duplicate like",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "url": "{{baseUrl}}/posts/{{postId}}/likes",
+        "description": "POST requires Bearer {{token}}. No body. Returns 204 (empty body), 401 if anonymous, 404 if post missing, or 409 for an own post or an existing like. The database enforces one like per user/post even for concurrent requests. No unlike operation is exposed.\n\nSaved responses are illustrative schema examples, not credentials or captured user data."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Expected HTTP 409\", () => pm.response.to.have.status(409));"
+            ]
+          }
+        }
+      ],
+      "response": [
+        {
+          "name": "409 Conflict — illustrative example",
+          "originalRequest": {
+            "method": "POST",
+            "header": [],
+            "url": "{{baseUrl}}/posts/{{postId}}/likes",
+            "description": "POST requires Bearer {{token}}. No body. Returns 204 (empty body), 401 if anonymous, 404 if post missing, or 409 for an own post or an existing like. The database enforces one like per user/post even for concurrent requests. No unlike operation is exposed.\n\nSaved responses are illustrative schema examples, not credentials or captured user data."
+          },
+          "status": "Conflict",
+          "code": 409,
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/problem+json"
+            }
+          ],
+          "body": "{\n  \"type\": \"about:blank\",\n  \"title\": \"You already liked this post.\",\n  \"status\": 409\n}",
+          "cookie": []
+        }
+      ]
+    },
+    {
+      "name": "Reject regular-user moderation",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "url": "{{baseUrl}}/posts/{{postId}}/tags",
+        "description": "POST requires a moderator bearer token. Empty body is supported; optional JSON {label:\"Misleading or false information\"} accepts only that label. Returns 204, 400 for an unsupported label, 401 if anonymous, 403 for a regular user, 404 if missing, 409 if already flagged. Moderator and timestamp are assigned server-side. Tags remain visible to anonymous readers. No removal operation is exposed.\n\nSaved responses are illustrative schema examples, not credentials or captured user data."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Expected HTTP 403\", () => pm.response.to.have.status(403));"
+            ]
+          }
+        }
+      ],
+      "response": [
+        {
+          "name": "403 Forbidden — illustrative example",
+          "originalRequest": {
+            "method": "POST",
+            "header": [],
+            "url": "{{baseUrl}}/posts/{{postId}}/tags",
+            "description": "POST requires a moderator bearer token. Empty body is supported; optional JSON {label:\"Misleading or false information\"} accepts only that label. Returns 204, 400 for an unsupported label, 401 if anonymous, 403 for a regular user, 404 if missing, 409 if already flagged. Moderator and timestamp are assigned server-side. Tags remain visible to anonymous readers. No removal operation is exposed.\n\nSaved responses are illustrative schema examples, not credentials or captured user data."
+          },
+          "status": "Forbidden",
+          "code": 403,
+          "header": [],
+          "body": "",
+          "cookie": []
+        }
+      ]
+    },
+    {
+      "name": "Login moderator",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/auth/login",
+        "description": "JSON: email and password. Returns 200 with token, expiresAt (UTC), and user {id,name,isModerator}. Invalid credentials or temporary account lockout return 401. Five failed attempts lock an account for five minutes. Auth routes share a per-IP limit of 30 requests/minute and return 429 when exceeded. The script saves the token to the collection variable; do not create an environment variable named token.\n\nSaved responses are illustrative schema examples, not credentials or captured user data.",
+        "auth": {
+          "type": "noauth"
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"moderator@example.test\",\n  \"password\": \"ForumDemo!2026\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Expected HTTP 200\", () => pm.response.to.have.status(200));",
+              "pm.collectionVariables.set(\"token\", pm.response.json().token);"
+            ]
+          }
+        }
+      ],
+      "response": [
+        {
+          "name": "200 OK — illustrative example",
+          "originalRequest": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/auth/login",
+            "description": "JSON: email and password. Returns 200 with token, expiresAt (UTC), and user {id,name,isModerator}. Invalid credentials or temporary account lockout return 401. Five failed attempts lock an account for five minutes. Auth routes share a per-IP limit of 30 requests/minute and return 429 when exceeded. The script saves the token to the collection variable; do not create an environment variable named token.\n\nSaved responses are illustrative schema examples, not credentials or captured user data.",
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"moderator@example.test\",\n  \"password\": \"ForumDemo!2026\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "status": "OK",
+          "code": 200,
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "body": "{\n  \"token\": \"<JWT returned by login; never publish a real token>\",\n  \"expiresAt\": \"2026-09-12T11:30:00Z\",\n  \"user\": {\n    \"id\": \"example-user\",\n    \"name\": \"Postman Partner\",\n    \"isModerator\": false\n  }\n}",
+          "cookie": []
+        }
+      ]
+    },
+    {
+      "name": "Flag post",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "url": "{{baseUrl}}/posts/{{postId}}/tags",
+        "description": "POST requires a moderator bearer token. Empty body is supported; optional JSON {label:\"Misleading or false information\"} accepts only that label. Returns 204, 400 for an unsupported label, 401 if anonymous, 403 for a regular user, 404 if missing, 409 if already flagged. Moderator and timestamp are assigned server-side. Tags remain visible to anonymous readers. No removal operation is exposed.\n\nSaved responses are illustrative schema examples, not credentials or captured user data."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Expected HTTP 204\", () => pm.response.to.have.status(204));"
+            ]
+          }
+        }
+      ],
+      "response": [
+        {
+          "name": "204 No Content — illustrative example",
+          "originalRequest": {
+            "method": "POST",
+            "header": [],
+            "url": "{{baseUrl}}/posts/{{postId}}/tags",
+            "description": "POST requires a moderator bearer token. Empty body is supported; optional JSON {label:\"Misleading or false information\"} accepts only that label. Returns 204, 400 for an unsupported label, 401 if anonymous, 403 for a regular user, 404 if missing, 409 if already flagged. Moderator and timestamp are assigned server-side. Tags remain visible to anonymous readers. No removal operation is exposed.\n\nSaved responses are illustrative schema examples, not credentials or captured user data."
+          },
+          "status": "No Content",
+          "code": 204,
+          "header": [],
+          "body": "",
+          "cookie": []
+        }
+      ]
+    },
+    {
+      "name": "Verify moderation audit",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/posts/{{postId}}",
+        "description": "Public GET. Returns a post including moderation label, moderator display name and UTC timestamp; returns 404 if missing. Optional bearer authentication personalises likedByMe.\n\nSaved responses are illustrative schema examples, not credentials or captured user data."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Expected HTTP 200\", () => pm.response.to.have.status(200));",
+              "pm.test(\"Moderator recorded\", () => pm.expect(pm.response.json().tags[0].moderator).to.equal(\"Morgan\"));"
+            ]
+          }
+        }
+      ],
+      "response": [
+        {
+          "name": "200 OK — illustrative example",
+          "originalRequest": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/posts/{{postId}}",
+            "description": "Public GET. Returns a post including moderation label, moderator display name and UTC timestamp; returns 404 if missing. Optional bearer authentication personalises likedByMe.\n\nSaved responses are illustrative schema examples, not credentials or captured user data."
+          },
+          "status": "OK",
+          "code": 200,
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "body": "{\n  \"id\": 1,\n  \"authorId\": \"alex\",\n  \"author\": \"Alex Chen\",\n  \"title\": \"Example integration question\",\n  \"body\": \"A fictional example for API consumers.\",\n  \"createdAt\": \"2026-09-11T10:00:00\",\n  \"likeCount\": 1,\n  \"commentCount\": 1,\n  \"likedByMe\": false,\n  \"tags\": [\n    {\n      \"label\": \"Misleading or false information\",\n      \"moderator\": \"Morgan\",\n      \"createdAt\": \"2026-09-12T10:00:00\"\n    }\n  ]\n}",
+          "cookie": []
+        }
+      ]
+    },
+    {
+      "name": "Filter flagged posts",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/posts?tag=flagged&sort=likes",
+        "description": "GET is public. Returns {items,total,pageNumber,pageSize}; items contain id, authorId, author, title, body, createdAt, likeCount, commentCount, likedByMe and tags. With a bearer token, likedByMe reflects the current user. Query parameters: page (1–100000, default 1), pageSize (1–50, default 10), author (user ID), from (inclusive UTC date-time), to (exclusive UTC date-time), tag (flagged/unflagged), sort (newest/oldest/likes; default newest). Example: /posts?author=alex&from=2026-09-01T00:00:00Z&to=2026-10-01T00:00:00Z&sort=likes&page=1&pageSize=10. Invalid values or reversed dates return 400. Filters apply to posts. POST requires a bearer token and JSON {title,body}: trimmed title 1–180, body 1–10000 characters. Returns 201 {id} with Location; 400 for validation; 401 if unauthenticated. Author identity always comes from the token.\n\nSaved responses are illustrative schema examples, not credentials or captured user data."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Expected HTTP 200\", () => pm.response.to.have.status(200));"
+            ]
+          }
+        }
+      ],
+      "response": [
+        {
+          "name": "200 OK — illustrative example",
+          "originalRequest": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/posts?tag=flagged&sort=likes",
+            "description": "GET is public. Returns {items,total,pageNumber,pageSize}; items contain id, authorId, author, title, body, createdAt, likeCount, commentCount, likedByMe and tags. With a bearer token, likedByMe reflects the current user. Query parameters: page (1–100000, default 1), pageSize (1–50, default 10), author (user ID), from (inclusive UTC date-time), to (exclusive UTC date-time), tag (flagged/unflagged), sort (newest/oldest/likes; default newest). Example: /posts?author=alex&from=2026-09-01T00:00:00Z&to=2026-10-01T00:00:00Z&sort=likes&page=1&pageSize=10. Invalid values or reversed dates return 400. Filters apply to posts. POST requires a bearer token and JSON {title,body}: trimmed title 1–180, body 1–10000 characters. Returns 201 {id} with Location; 400 for validation; 401 if unauthenticated. Author identity always comes from the token.\n\nSaved responses are illustrative schema examples, not credentials or captured user data."
+          },
+          "status": "OK",
+          "code": 200,
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "body": "{\n  \"items\": [\n    {\n      \"id\": 1,\n      \"authorId\": \"alex\",\n      \"author\": \"Alex Chen\",\n      \"title\": \"Example integration question\",\n      \"body\": \"A fictional example for API consumers.\",\n      \"createdAt\": \"2026-09-11T10:00:00\",\n      \"likeCount\": 1,\n      \"commentCount\": 1,\n      \"likedByMe\": false,\n      \"tags\": [\n        {\n          \"label\": \"Misleading or false information\",\n          \"moderator\": \"Morgan\",\n          \"createdAt\": \"2026-09-12T10:00:00\"\n        }\n      ]\n    }\n  ],\n  \"total\": 1,\n  \"pageNumber\": 1,\n  \"pageSize\": 10\n}",
+          "cookie": []
+        }
+      ]
+    },
+    {
+      "name": "Reject anonymous write",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "url": "{{baseUrl}}/posts/{{postId}}/tags",
+        "description": "POST requires a moderator bearer token. Empty body is supported; optional JSON {label:\"Misleading or false information\"} accepts only that label. Returns 204, 400 for an unsupported label, 401 if anonymous, 403 for a regular user, 404 if missing, 409 if already flagged. Moderator and timestamp are assigned server-side. Tags remain visible to anonymous readers. No removal operation is exposed.\n\nSaved responses are illustrative schema examples, not credentials or captured user data.",
+        "auth": {
+          "type": "noauth"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Expected HTTP 401\", () => pm.response.to.have.status(401));"
+            ]
+          }
+        }
+      ],
+      "response": [
+        {
+          "name": "401 Unauthorized — illustrative example",
+          "originalRequest": {
+            "method": "POST",
+            "header": [],
+            "url": "{{baseUrl}}/posts/{{postId}}/tags",
+            "description": "POST requires a moderator bearer token. Empty body is supported; optional JSON {label:\"Misleading or false information\"} accepts only that label. Returns 204, 400 for an unsupported label, 401 if anonymous, 403 for a regular user, 404 if missing, 409 if already flagged. Moderator and timestamp are assigned server-side. Tags remain visible to anonymous readers. No removal operation is exposed.\n\nSaved responses are illustrative schema examples, not credentials or captured user data.",
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "status": "Unauthorized",
+          "code": 401,
+          "header": [],
+          "body": "",
+          "cookie": []
+        }
+      ]
+    }
+  ]
+}
