@@ -211,6 +211,10 @@ clearing.
 
 ## Postman
 
+A public, read-only copy of this collection's documentation is published at
+**https://documenter.getpostman.com/view/4257716/2sBYAytUCK**, viewable without a
+Postman account. To run the requests yourself, import the files below instead.
+
 Import `postman/Forum.postman_collection.json` and `postman/Local.postman_environment.json`
 into Postman, then select **Forum Local**. The environment supplies only `baseUrl`;
 login tokens and generated IDs remain collection variables. Each request includes a
